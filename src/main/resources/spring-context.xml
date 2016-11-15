@@ -63,7 +63,7 @@
     <task:annotation-driven scheduler="scheduler" executor="executor" proxy-target-class="true"/>
      <!-- 配置数据源 -->
      <bean id="dataSource" class="com.ai.opt.sdk.datasource.OptHikariDataSource" lazy-init="false">
-		 <constructor-arg name="dataSourceName" value="aiplatform-db"/>
+		 <constructor-arg name="dataSourceName" value="aiplatform-db"/>  
 	</bean>
 	<bean id="seqDataSourceLoader" class="com.ai.opt.sdk.components.sequence.datasource.SeqDataSourceLoader" init-method="init" lazy-init="false">
 		<property name="ds" ref="dataSource" />
