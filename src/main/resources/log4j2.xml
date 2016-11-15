@@ -28,6 +28,9 @@
     <logger name="com.mybatis" additivity="true">
 		<level value="DEBUG" />
 	</logger>
+	<logger name="org.apache.ibatis" additivity="true">
+		<level value="DEBUG" />
+	</logger>
 	<logger name="java.sql.ResultSet" additivity="true">
 		<level value="DEBUG" />
 	</logger>
