@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.ai.platform.common.persistence.CrudDao;
 import com.ai.platform.common.persistence.annotation.MyBatisDao;
-import com.ai.platform.modules.sys.entity.Office;
+
 import com.ai.platform.modules.sys.entity.User;
 
 /**
