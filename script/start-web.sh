@@ -18,8 +18,9 @@ sed -i "s%serverName_Inner=.*%serverName_Inner=${serverName_Inner}%g" ./sso.prop
 sed -i "s%logOutServerUrl_Inner=.*%logOutServerUrl_Inner=${logOutServerUrl_Inner}%g" ./sso.properties
 sed -i "s%logOutBackUrl_Inner=.*%logOutBackUrl_Inner=${logOutBackUrl_Inner}%g" ./sso.properties
 sed -i "s%innerDomains=.*%innerDomains=${innerDomains}%g" ./sso.properties
+sed -i "s%serverContextPath=.*%serverContextPath=${serverContextPath}%g" ./sso.properties
 
-sed -i "s%whiteList=.*%whiteList=${whiteList}%g" ./whitelist.properties
+#sed -i "s%whiteList=.*%whiteList=${whiteList}%g" ./whitelist.properties
 
 sed -i "s%paas.auth.url=.*%paas.auth.url=${PAAS_AUTH_URL}%g" ./paas/paas-conf.properties
 sed -i "s%paas.auth.pid=.*%paas.auth.pid=${PAAS_AUTH_PID}%g" ./paas/paas-conf.properties
@@ -30,7 +31,7 @@ sed -i "s%paas.sdk.mode=.*%paas.sdk.mode=${SDK_MODE}%g" ./paas/paas-conf.propert
 sed -i "s%ccs.appname=.*%ccs.appname=${CCS_NAME}%g" ./paas/paas-conf.properties
 sed -i "s%ccs.zk_address=.*%ccs.zk_address=${ZK_ADDR}%g" ./paas/paas-conf.properties
 
-# 各中心要根据情况自己修改成与dubbo.properties中对应的配置项
+# 
 #sed -i "s%dubbo.registry.address=.*%dubbo.registry.address=${REST_REGISTRY_ADDR}%g" ./dubbo.properties
 popd
 
