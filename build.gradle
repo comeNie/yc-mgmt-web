@@ -31,7 +31,7 @@ configurations.all {
 	    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 	    exclude group: 'log4j', module: 'log4j'
     	exclude group: "org.slf4j", module: "slf4j-log4j12"
-    	//exclude group: "org.slf4j", module: "log4j-over-slf4j"
+    	exclude group: "org.slf4j", module: "log4j-over-slf4j"
  	}
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
