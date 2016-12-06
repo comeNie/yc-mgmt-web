@@ -46,7 +46,15 @@
 	<logger name="java.sql.PreparedStatement" additivity="true">
 		<level value="debug" />
 	</logger>    
-	<logger name="com.ai.platform" level="error" additivity="false">
+	<logger name="com.ai.platform" level="debug" additivity="false">
+		 <AppenderRef ref="RollingFile"/> 
+		 <AppenderRef ref="STDOUT"/>
+	</logger>  
+	<logger name="org.apache.shiro" level="debug" additivity="false">
+		 <AppenderRef ref="RollingFile"/> 
+		 <AppenderRef ref="STDOUT"/>
+	</logger>  
+	<logger name="org.apache.shiro.cache" level="debug" additivity="false">
 		 <AppenderRef ref="RollingFile"/> 
 		 <AppenderRef ref="STDOUT"/>
 	</logger>  

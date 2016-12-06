@@ -33,9 +33,6 @@
 	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
 		<property name="securityManager" ref="securityManager" />
 		<property name="loginUrl" value="${casServerLoginUrl}?service=${serverName_Inner}${serverContextPath}${adminPath}/cas" />
-
-
-		<property name="successUrl" value="${adminPath}?index" />
 		<property name="filters">
 			<map>
 				<entry key="cas" value-ref="casFilter" />
@@ -50,7 +47,7 @@
 
 	<!-- CAS认证过滤器 -->
 	<bean id="casFilter" class="org.apache.shiro.cas.CasFilter">
-		<property name="failureUrl" value="${adminPath}/index" />
+		<!-- <property name="failureUrl" value="${adminPath}/index" /> -->
 	</bean>
 	<bean id="logoutFilter" class="org.apache.shiro.web.filter.authc.LogoutFilter">
 	   <property name="redirectUrl" value="${logOutServerUrl_Inner}?service=${logOutBackUrl_Inner}${serverContextPath}"/>  
@@ -73,7 +70,7 @@
 	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
 		<property name="realm" ref="casRealm" />
 		<property name="sessionManager" ref="sessionManager" />
-		<property name="cacheManager" ref="shiroCacheManager" />
+		<!-- <property name="cacheManager" ref="shiroCacheManager" /> -->
 		<property name="subjectFactory" ref="casSubjectFactory" />
 	</bean>
 	<!-- 相当于调用SecurityUtils.setSecurityManager(securityManager) -->
@@ -88,15 +85,11 @@
 	<bean id="sessionManager"
 		class="com.ai.platform.common.security.shiro.session.SessionManager">
 		<property name="sessionDAO" ref="sessionDAO" />
-
 		<!-- 会话超时时间，单位：毫秒 -->
 		<property name="globalSessionTimeout" value="${session.sessionTimeout}" />
-
 		<!-- 定时清理失效会话, 清理用户直接关闭浏览器造成的孤立会话 -->
 		<property name="sessionValidationInterval" value="${session.sessionTimeoutClean}" />
-		<!-- <property name="sessionValidationSchedulerEnabled" value="false"/> -->
-		<property name="sessionValidationSchedulerEnabled" value="true" />
-
+		<property name="sessionValidationSchedulerEnabled" value="false"/>
 		<property name="sessionIdCookie" ref="sessionIdCookie" />
 		<property name="sessionIdCookieEnabled" value="true" />
 	</bean>
@@ -108,25 +101,24 @@
 	</bean>
 
 	<!-- 自定义Session存储容器 -->
-	<!-- <bean id="sessionDAO" class="com.ai.platform.common.security.shiro.session.JedisSessionDAO"> -->
-	<!-- <property name="sessionIdGenerator" ref="idGen" /> -->
-	<!-- <property name="sessionKeyPrefix" value="${redis.keyPrefix}_session_" 
-		/> -->
-	<!-- </bean> -->
-	<bean id="sessionDAO"
+	<bean id="sessionDAO" class="com.ai.platform.common.security.shiro.session.JedisSessionDAO">
+		<property name="sessionIdGenerator" ref="idGen" />
+	 	<property name="sessionKeyPrefix" value="shiro_session_"/>
+	</bean>			
+	<!-- <bean id="sessionDAO"
 		class="com.ai.platform.common.security.shiro.session.CacheSessionDAO">
 		<property name="sessionIdGenerator" ref="idGen" />
 		<property name="activeSessionsCacheName" value="activeSessionsCache" />
 		<property name="cacheManager" ref="shiroCacheManager" />
-	</bean>
+	</bean> -->
 
 	<!-- 自定义系统缓存管理器 -->
-	<!-- <bean id="shiroCacheManager" class="com.ai.platform.common.security.shiro.cache.JedisCacheManager"> -->
-	<!-- <property name="cacheKeyPrefix" value="${redis.keyPrefix}_cache_" /> -->
-	<!-- </bean> -->
-	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
-		<property name="cacheManager" ref="cacheManager" />
+	<bean id="shiroCacheManager" class="com.ai.platform.common.security.shiro.cache.JedisCacheManager">
+		<property name="cacheKeyPrefix" value="shiro_cache_" />
 	</bean>
+	<!-- <bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManager" ref="cacheManager" />
+	</bean> -->
 
 	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
 	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
