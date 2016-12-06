@@ -20,12 +20,13 @@ import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import redis.clients.jedis.Jedis;
-
+import com.ai.opt.sdk.components.mcs.MCSClientFactory;
+import com.ai.paas.ipaas.mcs.interfaces.ICacheClient;
 import com.ai.platform.common.config.Global;
 import com.ai.platform.common.utils.DateUtils;
 import com.ai.platform.common.utils.JedisUtils;
 import com.ai.platform.common.utils.StringUtils;
+import com.ai.platform.common.utils.UniSessionUtil;
 import com.ai.platform.common.web.Servlets;
 import com.google.common.collect.Sets;
 
@@ -39,6 +40,7 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private String sessionKeyPrefix = "shiro_session_";
+	private static final String cachens=UniSessionUtil.getSessionPassNameSpace();
 
 	@Override
 	public void update(Session session) throws UnknownSessionException {
@@ -64,15 +66,14 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 			}
 		}
 		
-		Jedis jedis = null;
+		ICacheClient jedis = null;
 		try {
 			
-			jedis = JedisUtils.getResource();
+			jedis = MCSClientFactory.getCacheClient(cachens);
 			
 			// 获取登录者编号
 			PrincipalCollection pc = (PrincipalCollection)session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
 			String principalId = pc != null ? pc.getPrimaryPrincipal().toString() : StringUtils.EMPTY;
-			
 			jedis.hset(sessionKeyPrefix, session.getId().toString(), principalId + "|" + session.getTimeout() + "|" + session.getLastAccessTime().getTime());
 			jedis.set(JedisUtils.getBytesKey(sessionKeyPrefix + session.getId()), JedisUtils.toBytes(session));
 			
@@ -84,7 +85,7 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 		} catch (Exception e) {
 			logger.error("update {} {}", session.getId(), request != null ? request.getRequestURI() : "", e);
 		} finally {
-			JedisUtils.returnResource(jedis);
+			//JedisUtils.returnResource(jedis);
 		}
 	}
 
@@ -94,9 +95,9 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 			return;
 		}
 		
-		Jedis jedis = null;
+		ICacheClient jedis = null;
 		try {
-			jedis = JedisUtils.getResource();
+			jedis = MCSClientFactory.getCacheClient(cachens);
 			
 			jedis.hdel(JedisUtils.getBytesKey(sessionKeyPrefix), JedisUtils.getBytesKey(session.getId().toString()));
 			jedis.del(JedisUtils.getBytesKey(sessionKeyPrefix + session.getId()));
@@ -105,7 +106,7 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 		} catch (Exception e) {
 			logger.error("delete {} ", session.getId(), e);
 		} finally {
-			JedisUtils.returnResource(jedis);
+			//JedisUtils.returnResource(jedis);
 		}
 	}
 	
@@ -135,9 +136,9 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 	public Collection<Session> getActiveSessions(boolean includeLeave, Object principal, Session filterSession){
 		Set<Session> sessions = Sets.newHashSet();
 		
-		Jedis jedis = null;
+		ICacheClient jedis = null;
 		try {
-			jedis = JedisUtils.getResource();
+			jedis = MCSClientFactory.getCacheClient(cachens);
 			Map<String, String> map = jedis.hgetAll(sessionKeyPrefix);
 			for (Map.Entry<String, String> e : map.entrySet()){
 				if (StringUtils.isNotBlank(e.getKey()) && StringUtils.isNotBlank(e.getValue())){
@@ -153,10 +154,10 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 						try{
 							// 验证SESSION
 							session.validate();
-							
 							boolean isActiveSession = false;
 							// 不包括离线并符合最后访问时间小于等于3分钟条件。
-							if (includeLeave || DateUtils.pastMinutes(session.getLastAccessTime()) <= 3){
+							if (includeLeave || DateUtils.pastMinutes(session.getLastAccessTime()) <= 30){
+								logger.debug("6、不包括离线并符合最后访问时间小于等于30分钟条件。");
 								isActiveSession = true;
 							}
 							// 符合登陆者条件。
@@ -186,6 +187,7 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 					}
 				}
 				// 存储的SESSION无Value
+				
 				else if (StringUtils.isNotBlank(e.getKey())){
 					jedis.hdel(sessionKeyPrefix, e.getKey());
 				}
@@ -194,7 +196,7 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 		} catch (Exception e) {
 			logger.error("getActiveSessions", e);
 		} finally {
-			JedisUtils.returnResource(jedis);
+			//JedisUtils.returnResource(jedis);
 		}
 		return sessions;
 	}
@@ -217,7 +219,6 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 
 	@Override
 	protected Session doReadSession(Serializable sessionId) {
-
 		Session s = null;
 		HttpServletRequest request = Servlets.getRequest();
 		if (request != null){
@@ -233,9 +234,9 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 		}
 
 		Session session = null;
-		Jedis jedis = null;
+		ICacheClient jedis = null;
 		try {
-			jedis = JedisUtils.getResource();
+			jedis = MCSClientFactory.getCacheClient(cachens);
 //			if (jedis.exists(sessionKeyPrefix + sessionId)){
 				session = (Session)JedisUtils.toObject(jedis.get(
 						JedisUtils.getBytesKey(sessionKeyPrefix + sessionId)));
@@ -244,7 +245,7 @@ public class JedisSessionDAO extends AbstractSessionDAO implements SessionDAO {
 		} catch (Exception e) {
 			logger.error("doReadSession {} {}", sessionId, request != null ? request.getRequestURI() : "", e);
 		} finally {
-			JedisUtils.returnResource(jedis);
+			//JedisUtils.returnResource(jedis);
 		}
 		
 		if (request != null && session != null){
