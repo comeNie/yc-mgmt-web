@@ -188,8 +188,15 @@
     <example>${fns:getAreaName(code)}</example>  
   </function>
  
+   <function>
+    <description>获取当前用户的最新公告前三条</description>
+    <name>getOaNotifyByUser</name>
+    <function-class>com.ai.platform.modules.oa.utils.OaNotifyUtils</function-class>
+    <function-signature>java.util.List getOaNotifyByUser()</function-signature>
+    <example>${fns:getOaNotifyByUser()}</example>  
+  </function>
  
-  
+   
   <!-- Encodes -->
   <function>
     <description>URL编码</description>
