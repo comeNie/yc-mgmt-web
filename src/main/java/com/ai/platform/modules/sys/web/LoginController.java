@@ -83,7 +83,7 @@ public class LoginController extends BaseController{
 //		view += "jar:file:/D:/GitHub/jeesite/src/main/webapp/WEB-INF/lib/jeesite.jar!";
 //		view += "/"+getClass().getName().replaceAll("\\.", "/").replace(getClass().getSimpleName(), "")+"view/sysLogin";
 //		view += ".jsp";
-		return "modules/sys/sysLogin";
+		return "modules/sys/sysLoginYc";
 	}
 
 	/**
@@ -189,9 +189,11 @@ public class LoginController extends BaseController{
 ////			request.getSession().setAttribute("aaa", "aa");
 ////		}
 //		System.out.println("==========================b");
+		
+		initLoginInfo(model, principal);
 		LogUtils.saveLog(request, "系统登录");
 		//initLoginInfo(model, principal);
-		return "modules/sys/sysSSOindex";
+		return "modules/sys/sysIndex_mgmt";
 	}
 	/**
 	 * 登录成功，进入管理首页

@@ -1,19 +1,18 @@
 package com.ai.platform.modules.sys.utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ai.platform.common.utils.SpringContextHolder;
-import com.ai.platform.modules.sys.dao.OfficeDao;
+import com.ai.opt.sdk.components.mcs.MCSClientFactory;
+import com.ai.paas.ipaas.mcs.interfaces.ICacheClient;
+import com.ai.paas.ipaas.util.SerializeUtil;
 import com.ai.platform.modules.sys.entity.Office;
 import com.google.common.collect.Lists;
 
 public class OfficeUtils {
-	@Autowired
-	private final static OfficeDao officeDao = SpringContextHolder.getBean(OfficeDao.class);
+	
+	private final static ICacheClient jedis = MCSClientFactory.getCacheClient("com.ai.platform.common.cache.gnarea");
 	
 	private OfficeUtils(){
 		
@@ -23,14 +22,15 @@ public class OfficeUtils {
 	 * 
 	 * @return
 	 */
-	public static List<Office>  cache_tree_data=new ArrayList<Office>();
 	public static List<Office> getOfficeList() {
 		
-		if (cache_tree_data == null || cache_tree_data.isEmpty() ) {
-			
-			cache_tree_data.addAll(UserUtils.getOfficeAllList());
+		List<Office> officeAllList = (List<Office>) SerializeUtil.deserialize(jedis.get(("OfficeAllList").getBytes()));
+		if(officeAllList==null || officeAllList.isEmpty()){
+			officeAllList = UserUtils.getOfficeAllList();
+			jedis.set(("OfficeAllList").getBytes(), SerializeUtil.serialize(officeAllList));
 		}
-		return cache_tree_data;
+		
+		return officeAllList;
 	}
 
 	
@@ -79,11 +79,9 @@ public class OfficeUtils {
 		}
 		return mapper;
 	}
-	/**
-	 * 清除数据缓存
-	 */
-	public static void clearCache(){
-		cache_tree_data = new ArrayList<Office>();
-	}
+	
 
+	public static void removeOfficeCache(){
+		jedis.del(("OfficeAllList").getBytes());
+	}
 }

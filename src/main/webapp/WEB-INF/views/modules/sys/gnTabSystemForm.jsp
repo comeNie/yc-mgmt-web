@@ -17,7 +17,7 @@
 							type:"POST",	
 							url:"${ctx}/sys/gnTabSystem/checkSystemId",
 							data:{
-								oldSystemId:function(){return  ${gnTabSystem.systemId};}
+								oldSystemId:function(){return  '${gnTabSystem.systemId}';}
 							}
 						}
 					},
@@ -28,7 +28,7 @@
 							type:"POST",	
 							url:"${ctx}/sys/gnTabSystem/checkSystemName",
 							data:{
-								oldSystemName:function(){return ${gnTabSystem.systemName};}
+								oldSystemName:function(){return '${gnTabSystem.systemName}';}
 							}
 						}
 					},
@@ -85,6 +85,7 @@
 		<div class="control-group">
 			<label class="control-label">应用编码：</label>
 			<div class="controls">
+				<input id="oldSystemId" name="oldSystemId" type="hidden" value="${gnTabSystem.systemId}">
 				<form:input path="systemId" htmlEscape="false" maxlength="21" class="username"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
@@ -92,6 +93,7 @@
 		<div class="control-group">
 			<label class="control-label">应用名称：</label>
 			<div class="controls">
+				<input id="oldSystemName" name="oldSystemName" type="hidden" value="${gnTabSystem.systemName}">
 				<form:input path="systemName" htmlEscape="false" maxlength="51" class="userName"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
@@ -99,18 +101,18 @@
 		<div class="control-group">
 			<label class="control-label">备注：</label>
 			<div class="controls">
-				<form:textarea path="remarks" htmlEscape="false" rows="4" maxlength="201" class="input-xlarge"/>
+				<form:textarea path="remarks" htmlEscape="false" rows="4" maxlength="201" class="input-xlarge remarks"/>
 			</div>
 		</div>
 		<div class="control-group">
 			<label class="control-label">应用上下文：</label>
 			<div class="controls">
-				<form:input path="systemUrlContext" htmlEscape="false" maxlength="401" class="input-xlarge"/>
+				<form:input path="systemUrlContext" htmlEscape="false" maxlength="401" class="input-xlarge url"/>
 			</div>
 		</div>
 		<div class="form-actions">
 			<shiro:hasPermission name="sys:gnTabSystem:edit"><input id="btnSubmit" class="btn btn-primary" type="submit" value="保 存"/>&nbsp;</shiro:hasPermission>
-			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
+			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="javascript:window.location.href='${ctx}/sys/gnTabSystem/'"/>
 		</div>
 	</form:form>
 </body>

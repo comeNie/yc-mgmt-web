@@ -16,7 +16,9 @@ public class GnTabSystem extends DataEntity<GnTabSystem> {
 	
 	private static final long serialVersionUID = 1L;
 	private String systemId;		// 应用编码
+	private String oldSystemId;
 	private String systemName;		// 应用名称
+	private String oldSystemName;
 	private String systemUrlContext;		// 应用上下文
 	
 	public GnTabSystem() {
@@ -29,6 +31,22 @@ public class GnTabSystem extends DataEntity<GnTabSystem> {
 
 
 	
+	public String getOldSystemId() {
+		return oldSystemId;
+	}
+
+	public void setOldSystemId(String oldSystemId) {
+		this.oldSystemId = oldSystemId;
+	}
+
+	public String getOldSystemName() {
+		return oldSystemName;
+	}
+
+	public void setOldSystemName(String oldSystemName) {
+		this.oldSystemName = oldSystemName;
+	}
+
 	@Length(min=1, max=32, message="应用编码长度必须介于 1 和 32 个字符 之间")
 	public String getSystemId() {
 		return systemId;
@@ -47,7 +65,7 @@ public class GnTabSystem extends DataEntity<GnTabSystem> {
 		this.systemName = systemName;
 	}
 	
-	@Length(min=0, max=500, message="应用上下文长度必须介于 0 和 500 个字符之间")
+	@Length(min=0, max=500, message="应用上下文长度必须介于 0 和 400 个字符之间")
 	public String getSystemUrlContext() {
 		return systemUrlContext;
 	}

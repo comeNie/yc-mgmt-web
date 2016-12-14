@@ -66,7 +66,6 @@
 		FROM gn_area a
 		<include refid="gnAreaJoins"/>
 		<where>
-			AND a.state = 1
 			<if test="areaCode != null and areaCode != ''">
 				AND a.area_code like 
 					<if test="dbName == 'oracle'">'%'||#{areaCode}||'%'</if>
@@ -83,6 +82,9 @@
 			<if test="id != null and id != ''">
 				AND a.id = #{id}
 			</if>			
+			<if test="state != null and state != ''">
+				AND a.state = #{state}
+			</if>
 		</where>
 		<choose>
 			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
@@ -187,10 +189,7 @@
 	</update>
 	
 	<update id="delete">
-		UPDATE gn_area SET 
-			state = #{state}
-		WHERE area_code = #{areaCode} 	
-		
+		DELETE FROM gn_area WHERE  area_code = #{areaCode} 	
 	</update>
 	
 	

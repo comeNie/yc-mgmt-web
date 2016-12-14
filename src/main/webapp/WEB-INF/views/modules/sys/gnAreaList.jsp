@@ -14,6 +14,12 @@
 			$("#searchForm").submit();
         	return false;
         }
+		function updateArea(id){
+			window.location.href='${ctx}/sys/gnArea/form?id='+id;
+	    }
+		function deleteArea(id){
+			return confirmx('确认要删除该区域信息吗？','${ctx}/sys/gnArea/delete?areaCode='+id);
+	    }
 	</script>
 </head>
 <body>
@@ -31,6 +37,12 @@
 			<li><label>区域名称：</label>
 				<form:input path="areaName" htmlEscape="false" maxlength="500" class="input-medium"/>
 			</li>
+			<li><label>状态：</label>
+				<form:select path="state" class="input-medium">
+					<form:option value="" label=""/>
+					<form:options items="${fns:getDictList('gn_area_state')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
+				</form:select>
+			</li>
 			<li class="btns"><input id="btnSubmit" class="btn btn-primary" type="submit" value="查询"/></li>
 			<li class="clearfix"></li>
 		</ul>
@@ -42,13 +54,14 @@
 				<th>区域编码</th>
 				<th>区域名称</th>
 				<th>所属区域</th>
+				<th>状态</th>
 				<shiro:hasPermission name="sys:gnArea:edit"><th>操作</th></shiro:hasPermission>
 			</tr>
 		</thead>
 		<tbody>
 		<c:forEach items="${page.list}" var="gnArea">
 			<tr>
-				<td><a href="${ctx}/sys/gnArea/form?id=${gnArea.id}">
+				<td><a href="javascript:void(0)" onclick="updateArea('${gnArea.id}')">
 					${gnArea.areaCode}
 				</a></td>
 				<td>
@@ -60,11 +73,13 @@
 				${fns:getAreaName(parentAreaCode)}
 				<c:set var="parentAreaCode" value=""/>
 				</td>
+				<td>
+					${fns:getDictLabel(gnArea.state, 'gn_area_state', '')}
+				</td>
 				<shiro:hasPermission name="sys:gnArea:edit"><td>
-				<c:if test="${gnArea.areaLevel ne '0'}">		
-    				<a href="${ctx}/sys/gnArea/form?id=${gnArea.id}">修改</a>
-    			
-					<a href="${ctx}/sys/gnArea/delete?areaCode=${gnArea.areaCode}" onclick="return confirmx('确认要删除该区域信息吗？', this.href)">删除</a>
+				<c:if test="${gnArea.areaLevel ne '0'}">
+					<a href="javascript:void(0)" onclick="updateArea('${gnArea.id}')">修改</a>
+    				<a href="javascript:void(0)" onclick="deleteArea('${gnArea.areaCode}')">删除</a>
 				</c:if>		
 				</td></shiro:hasPermission>
 			</tr>

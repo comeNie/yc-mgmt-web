@@ -14,11 +14,19 @@
 							type:"POST",	
 							url:"${ctx}/sys/gnTenant/checkTenantName",
 							data:{
-								oldTenantName:function(){return ${gnTenant.tenantName};}
+								oldTenantName:function(){return '${gnTenant.tenantName}';}
 							}
 						}
 					},
-					tenantId: {remote: "${ctx}/sys/gnTenant/checkTenantId?oldTenantId=" + encodeURIComponent('${gnTenant.tenantId}')}
+					tenantId: {
+						remote:{
+							type:"POST",	
+							url:"${ctx}/sys/gnTenant/checkTenantId",
+							data:{
+								oldTenantId:function(){return  '${gnTenant.tenantId}';}
+							}
+						}
+					}
 				},
 				messages: {
 					tenantName: {remote: "平台编码已存在"},
@@ -75,7 +83,7 @@
 		</div>
 		<div class="form-actions">
 			<shiro:hasPermission name="sys:gnTenant:edit"><input id="btnSubmit" class="btn btn-primary" type="submit" value="保 存"/>&nbsp;</shiro:hasPermission>
-			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
+			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="javascript:window.location.href='${ctx}/sys/gnTenant/'"/>
 		</div>
 	</form:form>
 </body>

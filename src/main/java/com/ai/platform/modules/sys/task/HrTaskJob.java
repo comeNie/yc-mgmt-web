@@ -9,18 +9,19 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.ai.opt.sdk.components.lock.AbstractMutexLock;
+import com.ai.opt.sdk.components.lock.RedisMutexLockFactory;
 import com.ai.platform.common.utils.DateUtils;
 import com.ai.platform.modules.sys.service.GnAreaService;
 import com.ai.platform.modules.sys.service.OfficeService;
 import com.ai.platform.modules.sys.service.SystemService;
+import com.ai.platform.modules.sys.utils.OfficeUtils;
 
 @Service
 @Lazy(false)
-@PropertySource("classpath:mgmt.properties")
 public class HrTaskJob {
 	private static final Logger LOG = Logger.getLogger(HrTaskJob.class);
 	@Autowired
@@ -36,14 +37,37 @@ public class HrTaskJob {
 	
 
 	public static ExecutorService handlePool;
+	private final String REDISKEY="redislock.importhrinfo";
 
-	@Scheduled(cron = "${jobs.scheduled}")
+//	@Scheduled(cron = "${jobs.scheduled}")
 	public void hrImportJob() {
-		run();
+		AbstractMutexLock lock=null;
+        boolean lockflag=false;
+        try{
+        	lock=RedisMutexLockFactory.getRedisMutexLock(REDISKEY);
+        	//lock.acquire();//争锁，无限等待
+        	lockflag=lock.acquire(10, TimeUnit.SECONDS);//争锁，超时时间10秒。
+        	if(lockflag){
+        		LOG.info("SUCESS线程【"+Thread.currentThread().getName()+"】获取到分布式锁，执行任务");
+        		run();
+        	}else{
+        		LOG.info("FAILURE线程【"+Thread.currentThread().getName()+"】未获取到分布式锁，不执行任务");
+        	}
+        } catch (Exception e) {
+        	LOG.error("获取分布式锁出错："+e.getMessage(),e);
+		} finally {
+    		try {
+				lock.release();
+				LOG.info("释放分布式锁OK");
+			} catch (Exception e) {
+				LOG.error("释放分布式锁出错："+e.getMessage(),e);
+			}
+        }
 	}
 
 	public void run() {
-		LOG.error("任务开始执行，当前时间戳："+DateUtils.getDateTime());
+		LOG.info("任务开始执行，当前时间戳："+DateUtils.getDateTime());
+		boolean isSynchronize =false;
 		try {
 			handlePool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 			userQueue = new LinkedBlockingQueue<String[]>(1000);
@@ -52,37 +76,40 @@ public class HrTaskJob {
 
 			handlePool.execute(new SftpReadFileThred(userQueue, officeQueue,officeRepeatQueue));
 			while (true) {
-				LOG.error("部门信息开始导入，当前时间戳："+DateUtils.getDateTime());
+				LOG.info("部门信息开始导入，当前时间戳："+DateUtils.getDateTime());
 				String[] office = officeQueue.poll(30, TimeUnit.SECONDS);
 				if (null == office) {
 					break;
 				}
-				LOG.error("部门名称:"+office[1]);
+				LOG.info("部门名称:"+office[1]);
 				handlePool.execute(new OfficeThread(office, officeService, areaService));
+				isSynchronize =true;
 			}
 			while (true) {
-				LOG.error("部门信息开始更新，当前时间戳："+DateUtils.getDateTime());
+				LOG.info("部门信息开始更新，当前时间戳："+DateUtils.getDateTime());
 				String[] office = officeRepeatQueue.poll(30, TimeUnit.SECONDS);
 				if (null == office) {
 					break;
 				}
-				LOG.error("部门名称:"+office[1]);
+				LOG.info("部门名称:"+office[1]);
 				handlePool.execute(new OfficeThread(office, officeService, areaService));
 			}
 			while (true) {
-				LOG.error("员工信息开始导入，当前时间戳："+DateUtils.getDateTime());
+				LOG.info("员工信息开始导入，当前时间戳："+DateUtils.getDateTime());
 				String[] user = userQueue.poll(30, TimeUnit.SECONDS);
 				if (null == user) {
 					break;
 				}
-				LOG.error("员工姓名:"+user[2]);
+				LOG.info("员工姓名:"+user[2]);
 				handlePool.execute(new UserThead(user, officeService, systemService));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("任务执行出错："+e.getMessage(),e);
 		} finally {
 			handlePool.shutdown();
-			LOG.error("任务结束，当前时间戳："+DateUtils.getDateTime());
+			if(isSynchronize)
+				OfficeUtils.removeOfficeCache();
+			LOG.info("任务结束，当前时间戳："+DateUtils.getDateTime());
 		}
 	}
 

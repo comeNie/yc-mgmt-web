@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.log4j.Logger;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,7 +40,6 @@ import com.ai.platform.modules.sys.entity.Office;
 import com.ai.platform.modules.sys.entity.Role;
 import com.ai.platform.modules.sys.entity.User;
 import com.ai.platform.modules.sys.service.GnTenantService;
-import com.ai.platform.modules.sys.service.OfficeService;
 import com.ai.platform.modules.sys.service.SystemService;
 import com.ai.platform.modules.sys.utils.OfficeUtils;
 import com.ai.platform.modules.sys.utils.UserUtils;
@@ -59,8 +59,6 @@ public class UserController extends BaseController {
 	
 	@Autowired
 	private SystemService systemService;
-	@Autowired
-	private OfficeService officeService;
 	@Autowired
 	private GnTenantService gnTenantService;
 	
@@ -92,11 +90,11 @@ public class UserController extends BaseController {
 	@RequiresPermissions("sys:user:view")
 	@RequestMapping(value = { "listno" })
 	public String listno(User user, HttpServletRequest request, HttpServletResponse response, Model model) {
-    	LOG.error("开始执行员工工号查询，当前时间戳："+DateUtils.getDateTime());
+    	LOG.error("开始执行员工账号查询，当前时间戳："+DateUtils.getDateTime());
 		user.getSqlMap().put("dsf", " AND a.login_name IS NOT NULL");
 		Page<User> page = systemService.findUser(new Page<User>(request, response), user);
 		model.addAttribute("page", page);
-    	LOG.error("结束执行员工工号查询，当前时间戳："+DateUtils.getDateTime());
+    	LOG.error("结束执行员工账号查询，当前时间戳："+DateUtils.getDateTime());
 		return "modules/sys/usernoList";
 	}
 	
@@ -195,6 +193,10 @@ public class UserController extends BaseController {
 			addMessage(redirectAttributes, "演示模式，不允许操作！");
 			return "redirect:" + adminPath + "/sys/user/list?repage";
 		}
+		if (!"true".equals(checkNo(user.getOldNo(), user.getNo()))) {
+			addMessage(model, "保存账号'" + user.getNo() + "'失败，员工编号已存在");
+			return form(user, model);
+		}
 		// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
 		user.setCompany(new Office(request.getParameter("company.id")));
 		user.setOffice(new Office(request.getParameter("office.id")));
@@ -209,7 +211,6 @@ public class UserController extends BaseController {
 		}
 		// 保存员工信息信息
 		systemService.saveUserNoUser(user);
-
 		addMessage(redirectAttributes, "保存员工信息'" + user.getName() + "'成功");
 		return "redirect:" + adminPath + "/sys/user/list?repage";
 	}
@@ -217,7 +218,7 @@ public class UserController extends BaseController {
 	@RequiresPermissions("sys:user:edit")
 	@RequestMapping(value = "saveno")
 	public String saveno(User user, HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
-		LOG.error("开始执行添加员工工号添加，当前时间戳："+DateUtils.getDateTime());
+		LOG.error("开始执行添加员工账号添加，当前时间戳："+DateUtils.getDateTime());
 		if (Global.isDemoMode()) {
 			addMessage(redirectAttributes, "演示模式，不允许操作！");
 			return "redirect:" + adminPath + "/sys/user/listno?repage";
@@ -234,7 +235,7 @@ public class UserController extends BaseController {
 			}
 		}
 		if (!"true".equals(checkLoginName(user.getOldLoginName(), user.getLoginName()))) {
-			addMessage(model, "保存工号'" + user.getLoginName() + "'失败，登录名已存在");
+			addMessage(model, "保存账号'" + user.getLoginName() + "'失败，登录名已存在");
 			return formno(user, model);
 		}
 		
@@ -245,16 +246,15 @@ public class UserController extends BaseController {
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			logger.error("保存工号发送邮件失败");
+			logger.error("保存账号发送邮件失败");
 		}
 		savemethod(user);
-		
-		addMessage(redirectAttributes, "保存工号'" + user.getLoginName() + "'成功");
-		LOG.error("结束执行添加员工工号添加，当前时间戳："+DateUtils.getDateTime());
+		addMessage(redirectAttributes, "保存账号'" + user.getLoginName() + "'成功");
+		LOG.error("结束执行添加员工账号添加，当前时间戳："+DateUtils.getDateTime());
 		return "redirect:" + adminPath + "/sys/user/listno?repage";
 	}
 	/**
-	 * 发送邮件-维护工号
+	 * 发送邮件-维护账号
 	 * @param user
 	 * @param resetPass
 	 * @throws Exception
@@ -301,11 +301,6 @@ public class UserController extends BaseController {
 		} catch (Exception e) {
 			logger.error("保存员工信息时发送邮件出错");
 		}
-		// 清除当前员工信息缓存
-		if (user.getLoginName().equals(UserUtils.getUser().getLoginName())) {
-			UserUtils.clearCache();
-			// UserUtils.getCacheMap().clear();
-		}
 
 	}
 
@@ -335,12 +330,12 @@ public class UserController extends BaseController {
 			return "redirect:" + adminPath + "/sys/user/list?repage";
 		}
 		if (UserUtils.getUser().getId().equals(user.getId())) {
-			addMessage(redirectAttributes, "删除工号失败, 不允许删除当前员工信息");
+			addMessage(redirectAttributes, "删除账号失败, 不允许删除当前员工信息");
 		} else if (User.isAdmin(user.getId())) {
-			addMessage(redirectAttributes, "删除工号失败, 不允许删除超级管理员员工信息");
+			addMessage(redirectAttributes, "删除账号失败, 不允许删除超级管理员员工信息");
 		} else {
 			systemService.deleteUser(user);
-			addMessage(redirectAttributes, "删除工号成功");
+			addMessage(redirectAttributes, "删除账号成功");
 		}
 		return "redirect:" + adminPath + "/sys/user/listno?repage";
 	}
@@ -468,10 +463,14 @@ public class UserController extends BaseController {
 	@RequiresPermissions("sys:user:edit")
 	@RequestMapping(value = "checkLoginName")
 	public String checkLoginName(String oldLoginName, String loginName) {
-		if (loginName != null && loginName.equals(oldLoginName)) {
-			return "true";
-		} else if (loginName != null && systemService.getUserByLoginName(loginName) == null) {
-			return "true";
+		try {
+			if (loginName != null && loginName.equals(oldLoginName)) {
+				return "true";
+			} else if (loginName != null && systemService.checkLoginName(loginName) == null) {
+				return "true";
+			}
+		} catch (Exception e) {
+			return "false";
 		}
 		return "false";
 	}
@@ -479,10 +478,14 @@ public class UserController extends BaseController {
 	@RequiresPermissions("sys:user:edit")
 	@RequestMapping(value = "checkEmail")
 	public String checkEmail(String oldLoginName, String email) {
-		if (email != null && email.equals(oldLoginName)) {
-			return "true";
-		} else if (email != null && systemService.getUserByLoginName(email) == null) {
-			return "true";
+		try {
+			if (email != null && email.equals(oldLoginName)) {
+				return "true";
+			} else if (email != null && systemService.checkLoginName(email) == null) {
+				return "true";
+			}
+		} catch (Exception e) {
+			return "false";
 		}
 		return "false";
 	}
@@ -490,10 +493,14 @@ public class UserController extends BaseController {
 	@RequiresPermissions("sys:user:edit")
 	@RequestMapping(value = "checkMobile")
 	public String checkMobile(String oldMobile, String mobile) {
-		if (mobile != null && mobile.equals(oldMobile)) {
-			return "true";
-		} else if (mobile != null && systemService.getUserByLoginName(mobile) == null) {
-			return "true";
+		try {
+			if (mobile != null && mobile.equals(oldMobile)) {
+				return "true";
+			} else if (mobile != null && systemService.checkLoginName(mobile) == null) {
+				return "true";
+			}
+		} catch (Exception e) {
+			return "false";
 		}
 		return "false";
 	}
@@ -502,10 +509,14 @@ public class UserController extends BaseController {
 	@RequiresPermissions("sys:user:edit")
 	@RequestMapping(value = "checkNo")
 	public String checkNo(String oldNo, String no) {
-		if (no != null && no.equals(oldNo)) {
-			return "true";
-		} else if (no != null && systemService.getUserByNo(no) == null) {
-			return "true";
+		try {
+			if (no != null && no.equals(oldNo)) {
+				return "true";
+			} else if (no != null && systemService.getUserByNo(no) == null) {
+				return "true";
+			}
+		} catch (Exception e) {
+			return "false";
 		}
 		return "false";
 	}
@@ -551,7 +562,7 @@ public class UserController extends BaseController {
 	}
 
 	/**
-	 * 冻结工号--不允许登录
+	 * 冻结账号--不允许登录
 	 * 
 	 * 
 	 */
@@ -561,10 +572,10 @@ public class UserController extends BaseController {
 		//user.setLoginFlag("0");
 		if(user.getLoginFlag()!=null && ("0").equals(user.getLoginFlag())){
 			systemService.updateLoginFalg(user);
-			addMessage(redirectAttributes, "冻结该工号成功");
+			addMessage(redirectAttributes, "冻结该账号成功");
 		}else if(user.getLoginFlag()!=null && ("1").equals(user.getLoginFlag())){
 			systemService.updateLoginFalg(user);
-			addMessage(redirectAttributes, "解冻该工号成功");
+			addMessage(redirectAttributes, "解冻该账号成功");
 		}
 
 		return "redirect:" + adminPath + "/sys/user/listno?repage";
@@ -578,7 +589,7 @@ public class UserController extends BaseController {
 	@RequestMapping(value = "resetPWD")
 	public String resetPWD(User user, RedirectAttributes redirectAttributes) {
 		if (StringUtils.isBlank(user.getEmail())) {
-			addMessage(redirectAttributes, "重置密码失败，该工号没有维护邮箱");
+			addMessage(redirectAttributes, "重置密码失败，该账号没有维护邮箱");
 			return "redirect:" + adminPath + "/sys/user/listno?repage";
 		}
 
@@ -747,28 +758,7 @@ public class UserController extends BaseController {
 			return true;
 		}
 	}
-	// @InitBinder
-	// public void initBinder(WebDataBinder b) {
-	// b.registerCustomEditor(List.class, "roleList", new
-	// PropertyEditorSupport(){
-	// @Autowired
-	// private SystemService systemService;
-	// @Override
-	// public void setAsText(String text) throws IllegalArgumentException {
-	// String[] ids = StringUtils.split(text, ",");
-	// List<Role> roles = new ArrayList<Role>();
-	// for (String id : ids) {
-	// Role role = systemService.getRole(Long.valueOf(id));
-	// roles.add(role);
-	// }
-	// setValue(roles);
-	// }
-	// @Override
-	// public String getAsText() {
-	// return Collections3.extractToString((List) getValue(), "id", ",");
-	// }
-	// });
-	// }
+
 
 	public static void main(String[] args) {
 		String a = "zhangsan\\t001\\t张三\\tzhangsan@163.com\\t13333333333\\t0001\\t00011";

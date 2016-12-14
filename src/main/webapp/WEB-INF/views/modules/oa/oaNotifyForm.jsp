@@ -12,11 +12,11 @@
 					
 					title:{
 						required:true,
-						maxlength: 18
+						maxlength: 20
 					},
 					content:{
 						required:true,
-						maxlength: 224
+						maxlength: 225
 					},
 					oaNotifyRecordName:{
 						required:true
@@ -25,15 +25,15 @@
 				messages:{
 					
 					title:{
-						required: "必填信息", 
-						maxlength: "标题长度不能超过18个字符", 
+						required: "请输入标题", 
+						maxlength: "标题长度不能超过20个字符", 
 					},
 					content:{
-						required: "必填信息", 
-						maxlength: "内容不能超过224个字符", 
-					},oaNotifyRecordName:{
-						 required:"必填信息"
-					}
+						required: "请输入内容", 
+						maxlength: "内容不能超过225个字符", 
+					},
+					status:{required:"请选择状态"},
+					type:{required:"请选择类型"}
 				},
 				submitHandler: function(form){
 					loading('正在提交，请稍等...');
@@ -44,7 +44,7 @@
 					$("#messageBox").text("输入有误，请先更正。");
 					if(element.attr("name")=="oaNotifyRecordName"){
 						$("#treeerro").find("label").remove(); 
-						$("<label for='oaNotifyRecordName' class='error'>必填信息</label>").appendTo("#treeerro");
+						$("<label for='oaNotifyRecordName' class='error'>请选择接收人</label>").appendTo("#treeerro");
 					}else if (element.is(":radio")){
 						$("#treeerro").find("label").remove();
 						error.appendTo(element.parent().parent());
@@ -81,14 +81,14 @@
 		<div class="control-group">
 			<label class="control-label">标题：</label>
 			<div class="controls">
-				<form:input path="title" htmlEscape="false"  disabled="${oaNotify.status eq '1' ? true : false}" class="input-xlarge required"/>
+				<form:input path="title" htmlEscape="false" maxlength="21" disabled="${oaNotify.status eq '1' ? true : false}" class="input-xlarge required"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
 		</div>
 		<div class="control-group">
 			<label class="control-label">内容：</label>
 			<div class="controls">
-				<form:textarea path="content" htmlEscape="false" rows="6"  disabled="${oaNotify.status eq '1' ? true : false}" class="input-xxlarge required"/>
+				<form:textarea path="content" htmlEscape="false" maxlength="226" rows="6"  disabled="${oaNotify.status eq '1' ? true : false}" class="input-xxlarge required remarks"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
 		</div>
@@ -98,7 +98,7 @@
 				<div class="controls">
 					<form:hidden id="files" path="files" htmlEscape="false" maxlength="255" class="input-xlarge"/>
 					<sys:ckfinder input="files" type="files" uploadPath="/oa/notify" selectMultiple="true"/>
-					<span class="help-inline"> 最多不能超过三个附件。</span>
+					<span class="help-inline"> 最多不能超过三个附件,双击添加附件。</span>
 				</div>
 			</div>
 			<div class="control-group">
@@ -164,7 +164,7 @@
 			<c:if test="${oaNotify.status ne '1'}">
 				<shiro:hasPermission name="oa:oaNotify:edit"><input id="btnSubmit" class="btn btn-primary" type="submit" value="保 存"/>&nbsp;</shiro:hasPermission>
 			</c:if>
-			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
+			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="javascript:window.location.href='${ctx}/oa/oaNotify/'"/>
 		</div>
 	</form:form>
 </body>
