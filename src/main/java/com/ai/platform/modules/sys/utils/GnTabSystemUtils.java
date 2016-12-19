@@ -1,21 +1,20 @@
 package com.ai.platform.modules.sys.utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ai.opt.sso.client.filter.SSOClientUtil;
 import com.ai.platform.common.utils.SpringContextHolder;
 import com.ai.platform.modules.sys.dao.GnTabSystemDao;
-
 import com.ai.platform.modules.sys.entity.GnTabSystem;
 
 public class GnTabSystemUtils {
 	@Autowired
 	private final static GnTabSystemDao gnTabSystemDao = SpringContextHolder.getBean(GnTabSystemDao.class);
 	
+	private static String homeContextUrl;
 	private GnTabSystemUtils(){
 		
 	}
@@ -24,15 +23,8 @@ public class GnTabSystemUtils {
 	 * 
 	 * @return
 	 */
-	public static List<GnTabSystem>  cache_tabsystem_data=new ArrayList<GnTabSystem>();
 	public static List<GnTabSystem> getGnTabSystemList() {
-		
-		if (cache_tabsystem_data == null || cache_tabsystem_data.isEmpty() ) {
-			cache_tabsystem_data = new ArrayList<GnTabSystem>();
-			
-			cache_tabsystem_data.addAll(gnTabSystemDao.findList(new GnTabSystem()));
-		}
-		return cache_tabsystem_data;
+		return gnTabSystemDao.findList(new GnTabSystem());
 	}
  
 	
@@ -68,13 +60,16 @@ public class GnTabSystemUtils {
 		return null;
 	}
 
-	
 	/**
-	 * 清除数据缓存
+	 * 获取serverContext
+	 * @return
+	 * @author zhouxh
 	 */
-	public static void clearCache(){
-		cache_tabsystem_data = new ArrayList<GnTabSystem>();
-				
+	public static String getHomeContextUrl(){
+		if(homeContextUrl==null){
+			homeContextUrl =SSOClientUtil.getProperty("serverName")+SSOClientUtil.getProperty("serverContextPath");
+		}
+		return homeContextUrl;
 	}
 
 }

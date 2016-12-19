@@ -27,6 +27,7 @@
 					},onAsyncSuccess: function(event, treeId, treeNode, msg){
 						var nodes = tree.getNodesByParam("pId", treeNode.id, null);
 						for (var i=0, l=nodes.length; i<l; i++) {
+						
 							try{tree.checkNode(nodes[i], treeNode.checked, true);}catch(e){}
 							//tree.selectNode(nodes[i], false);
 						}
@@ -59,10 +60,12 @@
 					tree.expandNode(nodes[i], true, false, false);
 				}
 				//异步加载子节点（加载用户）
-				var nodesOne = tree.getNodesByParam("isParent", true);
+				/* var nodesOne = tree.getNodesByParam("isParent", true);
+				
 				for(var j=0; j<nodesOne.length; j++) {
+					alert("j==="+j);
 					tree.reAsyncChildNodes(nodesOne[j],"!refresh",true);
-				}
+				} */
 				selectCheckNode();
 			});
 			key = $("#key");
@@ -74,6 +77,7 @@
 		// 默认选择节点
 		function selectCheckNode(){
 			var ids = "${selectIds}".split(",");
+			alert("selectCheckNode==="+ds.length);
 			for(var i=0; i<ids.length; i++) {
 				var node = tree.getNodeByParam("id", (type==3?"u_":"")+ids[i]);
 				if("${checked}" == "true"){
@@ -186,10 +190,10 @@
 	<!-- <div style="position:absolute;right:8px;top:5px;cursor:pointer;" onclick="search();">
 		<i class="icon-search"></i><label id="txt">搜索</label>
 	</div> -->
-	<div id="search" class="form-search hide" style="padding:10px 0 0 13px;">
+<!-- 	<div id="search" class="form-search hide" style="padding:10px 0 0 13px;">
 		<label for="key" class="control-label" style="padding:5px 5px 3px 0;">关键字：</label>
 		<input type="text" class="empty" id="key" name="key" maxlength="50" style="width:110px;">
 		<button class="btn" id="btn" onclick="searchNode()">搜索</button>
-	</div>
+	</div> -->
 	<div id="tree" class="ztree" style="padding:15px 20px;"></div>
 </body>

@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +40,11 @@ import com.ai.platform.modules.sys.entity.Role;
 import com.ai.platform.modules.sys.entity.RoleMenu;
 import com.ai.platform.modules.sys.entity.User;
 import com.ai.platform.modules.sys.entity.Waitjobs;
+import com.ai.platform.modules.sys.realm.UserCasRealm;
 import com.ai.platform.modules.sys.security.SystemAuthorizingRealm;
+import com.ai.platform.modules.sys.security.SystemAuthorizingRealm.Principal;
 import com.ai.platform.modules.sys.utils.LogUtils;
+import com.ai.platform.modules.sys.utils.OfficeUtils;
 import com.ai.platform.modules.sys.utils.UserUtils;
 
 /**
@@ -71,7 +74,7 @@ public class SystemService extends BaseService implements InitializingBean {
 	@Autowired
 	private WaitjobsDao waitjobsDao;
 	@Autowired
-	private SystemAuthorizingRealm systemRealm;
+	private UserCasRealm systemRealm;
 	
 	public SessionDAO getSessionDao() {
 		return sessionDao;
@@ -97,6 +100,10 @@ public class SystemService extends BaseService implements InitializingBean {
 	 */
 	public User getUserByLoginName(String loginName) {
 		return UserUtils.getByLoginName(loginName);
+	}
+	
+	public User getByLoginUser(User loginName) {
+		return userDao.getByLoginUser(loginName);
 	}
 	
 	public Page<User> findUser(Page<User> page, User user) {
@@ -154,9 +161,6 @@ public class SystemService extends BaseService implements InitializingBean {
 		}else{
 			// 清除原用户机构用户缓存
 			User oldUser = userDao.get(user.getId());
-			if (oldUser.getOffice() != null && oldUser.getOffice().getId() != null){
-				CacheUtils.remove(UserUtils.USER_CACHE, UserUtils.USER_CACHE_LIST_BY_OFFICE_ID_ + oldUser.getOffice().getId());
-			}
 			// 更新用户数据
 			user.preUpdate();
 			userDao.update(user);
@@ -176,10 +180,8 @@ public class SystemService extends BaseService implements InitializingBean {
 			
 			// 将当前用户同步到Activiti
 			deleteActivitiUser(user);
-			// 清除用户缓存
-			UserUtils.clearCache(user);
-			UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
 //			// 清除权限缓存
+			OfficeUtils.removeOfficeCache();
 			systemRealm.clearAllCachedAuthorizationInfo();
 		}
 	}
@@ -189,9 +191,8 @@ public class SystemService extends BaseService implements InitializingBean {
 		user.preUpdate();
 		userDao.updateUserInfo(user);
 		// 清除用户缓存
-		UserUtils.clearCache(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
 //		// 清除权限缓存
+		OfficeUtils.removeOfficeCache();
 		systemRealm.clearAllCachedAuthorizationInfo();
 	}
 	
@@ -201,10 +202,9 @@ public class SystemService extends BaseService implements InitializingBean {
 		// 同步到Activiti
 		deleteActivitiUser(user);
 		// 清除用户缓存
-		UserUtils.clearCache(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
 //		// 清除权限缓存
 		systemRealm.clearAllCachedAuthorizationInfo();
+		OfficeUtils.removeOfficeCache();
 	}
 	
 	@Transactional(readOnly = false)
@@ -214,8 +214,6 @@ public class SystemService extends BaseService implements InitializingBean {
 		userDao.updatePasswordById(user);
 		// 清除用户缓存
 		user.setLoginName(loginName);
-		UserUtils.clearCache(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
 //		// 清除权限缓存
 		systemRealm.clearAllCachedAuthorizationInfo();
 	}
@@ -327,7 +325,6 @@ public class SystemService extends BaseService implements InitializingBean {
 		// 同步到Activiti
 //		saveActivitiGroup(role);
 		// 清除用户角色缓存
-		UserUtils.removeCache(UserUtils.CACHE_ROLE_LIST);
 //		// 清除权限缓存
 		systemRealm.clearAllCachedAuthorizationInfo();
 	}
@@ -338,9 +335,7 @@ public class SystemService extends BaseService implements InitializingBean {
 		if (roleMenu.getMenuList().size() > 0){
 			roleMenuDao.insertRoleMenu(roleMenu);
 		}
-		UserUtils.removeCache(UserUtils.CACHE_MENU_LIST);
 		// 清除用户角色缓存
-		UserUtils.removeCache(UserUtils.CACHE_ROLE_LIST);
 		// 清除权限缓存
 		systemRealm.clearAllCachedAuthorizationInfo();
 	}
@@ -351,7 +346,6 @@ public class SystemService extends BaseService implements InitializingBean {
 		// 同步到Activiti
 //		deleteActivitiGroup(role);
 		// 清除用户角色缓存
-		UserUtils.removeCache(UserUtils.CACHE_ROLE_LIST);
 //		// 清除权限缓存
 		systemRealm.clearAllCachedAuthorizationInfo();
 	}
@@ -366,6 +360,7 @@ public class SystemService extends BaseService implements InitializingBean {
 				return true;
 			}
 		}
+		OfficeUtils.removeOfficeCache();
 		return false;
 	}
 	
@@ -423,7 +418,6 @@ public class SystemService extends BaseService implements InitializingBean {
 			menuDao.updateParentIds(e);
 		}
 		// 清除用户菜单缓存
-		UserUtils.removeCache(UserUtils.CACHE_MENU_LIST);
 //		// 清除权限缓存
 		systemRealm.clearAllCachedAuthorizationInfo();
 		// 清除日志相关缓存
@@ -434,7 +428,6 @@ public class SystemService extends BaseService implements InitializingBean {
 	public void updateMenuSort(Menu menu) {
 		menuDao.updateSort(menu);
 		// 清除用户菜单缓存
-		UserUtils.removeCache(UserUtils.CACHE_MENU_LIST);
 //		// 清除权限缓存
 //		systemRealm.clearAllCachedAuthorizationInfo();
 		// 清除日志相关缓存
@@ -445,7 +438,6 @@ public class SystemService extends BaseService implements InitializingBean {
 	public void deleteMenu(Menu menu) {
 		menuDao.delete(menu);
 		// 清除用户菜单缓存
-		UserUtils.removeCache(UserUtils.CACHE_MENU_LIST);
 //		// 清除权限缓存
 //		systemRealm.clearAllCachedAuthorizationInfo();
 		// 清除日志相关缓存
@@ -624,7 +616,6 @@ public class SystemService extends BaseService implements InitializingBean {
 		String resetPass = RandomUtils.generateString(8);
 		user.setPassword(entryptPassword(resetPass));
 		userDao.updatePasswordById(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
 		sendMail(user,resetPass);
 	}
 	/**
@@ -693,14 +684,20 @@ public class SystemService extends BaseService implements InitializingBean {
 		user.preUpdate();
 		userDao.updateLoginFalg(user);
 		// 清除用户缓存
-		UserUtils.clearCache(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
 	}
 	@Transactional(readOnly = true)
 	public List<User> findAllUser() {
 		// TODO Auto-generated method stub
 		return UserUtils.getUserList(new User());
 //		return userDao.findList(new User());
+	}
+	
+	public  User checkLoginName(String loginName) {
+		User user =null;
+		if (user == null) {
+			user = userDao.getByLoginName(new User(null, loginName));
+		}
+		return user;
 	}
 	/**
 	 * 保存用户信息，不包括用户名、密码等
@@ -716,10 +713,7 @@ public class SystemService extends BaseService implements InitializingBean {
 			user.preUpdate();
 			userDao.updateUserNoUser(user);
 		}
-
-		// 清除用户缓存
-		UserUtils.clearCache(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
+		OfficeUtils.removeOfficeCache();
 	}
 	
 	@Transactional(readOnly = false)
@@ -733,9 +727,7 @@ public class SystemService extends BaseService implements InitializingBean {
 			user.preUpdate();
 			userDao.updateUserNoUser(user);
 		}
-		// 清除用户缓存
-		UserUtils.clearCache(user);
-		UserUtils.removeCache(UserUtils.CACHE_USER_LIST);
+		OfficeUtils.removeOfficeCache();
 	}
 	
 	

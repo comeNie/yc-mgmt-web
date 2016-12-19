@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.ai.platform.common.persistence.CrudDao;
 import com.ai.platform.common.persistence.annotation.MyBatisDao;
-
+import com.ai.platform.modules.sys.entity.Office;
 import com.ai.platform.modules.sys.entity.User;
 
 /**
@@ -24,6 +24,7 @@ public interface UserDao extends CrudDao<User> {
 	 * @return
 	 */
 	public User getByLoginName(User user);
+	public User getByLoginUser(User user);
 	
 	/**
 	 * 根据登录名称查询用户

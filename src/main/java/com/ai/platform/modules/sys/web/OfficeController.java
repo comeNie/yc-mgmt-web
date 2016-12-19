@@ -147,7 +147,6 @@ public class OfficeController extends BaseController {
 					+ StringUtils.leftPad(String.valueOf(size > 0 ? size + 1 : 1), 3, "0"));
 		}
 		model.addAttribute("office", office);
-		OfficeUtils.clearCache();
 		return "modules/mgmtsys/officeForm";
 	}
 
@@ -164,20 +163,20 @@ public class OfficeController extends BaseController {
 		if (office.getGnArea() == null) {
 			office.setGnArea(user.getOffice().getGnArea());
 		}
-		// 自动获取排序号
-		if (StringUtils.isBlank(office.getId()) && office.getParent() != null) {
-			int size = 0;
-			List<Office> list = officeService.findAll();
-			for (int i = 0; i < list.size(); i++) {
-				Office e = list.get(i);
-				if (e.getParent() != null && e.getParent().getId() != null
-						&& e.getParent().getId().equals(office.getParent().getId())) {
-					size++;
-				}
-			}
-			office.setCode(office.getParent().getCode()
-					+ StringUtils.leftPad(String.valueOf(size > 0 ? size + 1 : 1), 3, "0"));
-		}
+//		// 自动获取排序号
+//		if (StringUtils.isBlank(office.getId()) && office.getParent() != null) {
+//			int size = 0;
+//			List<Office> list = officeService.findAll();
+//			for (int i = 0; i < list.size(); i++) {
+//				Office e = list.get(i);
+//				if (e.getParent() != null && e.getParent().getId() != null
+//						&& e.getParent().getId().equals(office.getParent().getId())) {
+//					size++;
+//				}
+//			}
+//			office.setCode(office.getParent().getCode()
+//					+ StringUtils.leftPad(String.valueOf(size > 0 ? size + 1 : 1), 3, "0"));
+//		}
 		model.addAttribute("office", office);
 		return "modules/sys/officeForm";
 	}
@@ -203,7 +202,6 @@ public class OfficeController extends BaseController {
 			return form(office, model);
 		}
 		officeService.save(office);
-		OfficeUtils.clearCache();
 		if (office.getChildDeptList() != null) {
 			Office childOffice = null;
 			for (String id : office.getChildDeptList()) {
@@ -223,7 +221,6 @@ public class OfficeController extends BaseController {
 		// office.getParentId();
 		// return "redirect:" + adminPath +
 		// "/sys/office/list?id="+id+"&parentIds="+office.getParentIds();
-		OfficeUtils.clearCache();
 		return "redirect:" + adminPath + "/sys/office/page";
 	}
 
@@ -314,7 +311,6 @@ public class OfficeController extends BaseController {
 		} catch (Exception e) {
 			addMessage(redirectAttributes, "导入部门信息失败！失败信息：" + e.getMessage());
 		}
-		OfficeUtils.clearCache();
 		return "redirect:" + adminPath + "/sys/office/page?repage";
 	}
 
@@ -368,7 +364,6 @@ public class OfficeController extends BaseController {
 		 }
 		// return "redirect:" + adminPath +
 		// "/sys/office/list?id="+office.getParentId()+"&parentIds="+office.getParentIds();
-		OfficeUtils.clearCache();
 		return "redirect:" + adminPath + "/sys/office/page";
 	}
 
@@ -383,13 +378,17 @@ public class OfficeController extends BaseController {
 	@ResponseBody
 	@RequestMapping(value = "checkName")
 	public String checkName(String oldName, String name) {
-		Office o = new Office();
-		o.setName(name);
-		List<Office> list = officeService.find(o);
-		if (name != null && name.equals(oldName)) {
-			return "true";
-		} else if (name != null && CollectionUtil.isEmpty(list)) {
-			return "true";
+		try {
+			Office o = new Office();
+			o.setName(name);
+			List<Office> list = officeService.find(o);
+			if (name != null && name.equals(oldName)) {
+				return "true";
+			} else if (name != null && CollectionUtil.isEmpty(list)) {
+				return "true";
+			}
+		} catch (Exception e) {
+			return "false";
 		}
 		return "false";
 	}
@@ -405,13 +404,17 @@ public class OfficeController extends BaseController {
 	@ResponseBody
 	@RequestMapping(value = "checkCode")
 	public String checkCode(String oldCode, String code) {
-		Office o = new Office();
-		o.setCode(code);
-		List<Office> list = officeService.find(o);
-		if (code != null && code.equals(oldCode)) {
-			return "true";
-		} else if (code != null && CollectionUtil.isEmpty(list)) {
-			return "true";
+		try {
+			Office o = new Office();
+			o.setCode(code);
+			List<Office> list = officeService.find(o);
+			if (code != null && code.equals(oldCode)) {
+				return "true";
+			} else if (code != null && CollectionUtil.isEmpty(list)) {
+				return "true";
+			}
+		} catch (Exception e) {
+			return "false";
 		}
 		return "false";
 	}
@@ -435,7 +438,7 @@ public class OfficeController extends BaseController {
 			@RequestParam(required = false) String type, @RequestParam(required = false) Long grade,
 			@RequestParam(required = false) Boolean isAll, HttpServletResponse response) {
 		List<Map<String, Object>> mapList = Lists.newArrayList();
-		List<Office> list = officeService.findList(isAll);
+		List<Office> list = OfficeUtils.getOfficeList();
 		for (int i = 0; i < list.size(); i++) {
 			Office e = list.get(i);
 

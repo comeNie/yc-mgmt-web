@@ -21,44 +21,38 @@
     </Async>
   </Appenders>
   <Loggers>
-    <logger name="com.ai.opt.sdk" level="error" additivity="false">
+    <logger name="com.ai.opt.sdk" level="info" additivity="false">
          <AppenderRef ref="RollingFile" />
          <AppenderRef ref="STDOUT" />
     </logger>
-     <logger name="com.ai.platform.modules.sys.dao" additivity="true">
-		<level value="debug" />
-	</logger>
     <logger name="com.mybatis" additivity="true">
-		<level value="debug" />
-	</logger>
-	<logger name="org.apache.ibatis" additivity="true">
-		<level value="error" />
+		<level value="info" />
 	</logger>
 	<logger name="java.sql.ResultSet" additivity="true">
-		<level value="error" />
+		<level value="info" />
 	</logger>
 	<logger name="java.sql.Connection" additivity="true">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 	<logger name="java.sql.Statement" additivity="true">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 	<logger name="java.sql.PreparedStatement" additivity="true">
-		<level value="debug" />
+		<level value="info" />
 	</logger>    
-	<logger name="com.ai.platform" level="debug" additivity="false">
+	<logger name="com.ai.platform" level="info" additivity="false">
 		 <AppenderRef ref="RollingFile"/> 
 		 <AppenderRef ref="STDOUT"/>
 	</logger>  
-	<logger name="org.apache.shiro" level="debug" additivity="false">
+	<logger name="org.apache.shiro" level="info" additivity="false">
 		 <AppenderRef ref="RollingFile"/> 
 		 <AppenderRef ref="STDOUT"/>
 	</logger>  
-	<logger name="org.apache.shiro.cache" level="debug" additivity="false">
+	<logger name="org.apache.shiro.cache" level="info" additivity="false">
 		 <AppenderRef ref="RollingFile"/> 
 		 <AppenderRef ref="STDOUT"/>
-	</logger>  
-    <Root level="error">
+	</logger>  	
+    <Root level="info">
       <AppenderRef ref="RollingFile" />
       <AppenderRef ref="STDOUT" />
     </Root>
