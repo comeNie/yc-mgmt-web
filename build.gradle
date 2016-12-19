@@ -190,7 +190,7 @@ processResources {
 }
 
 war {
-    baseName = "mgmt"  
+    baseName = "portal"  
 }
 
 jar {
