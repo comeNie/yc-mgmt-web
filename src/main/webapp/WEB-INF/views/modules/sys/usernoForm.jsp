@@ -30,8 +30,8 @@
 							}
 						}
 					},
-					newPassword: {maxlength: 50},
-					confirmNewPassword: {maxlength: 50},
+					newPassword: {minlength:6,maxlength: 50},
+					confirmNewPassword: {minlength:6,maxlength: 50},
 					email: {
 						maxlength: 50,
 						remote:{
@@ -51,14 +51,14 @@
 						remote: "用户登录名已存在"},
 					newPassword: {
 						required: "请输入密码", 
-						maxlength: "密码不能超过50个字符"},
+						maxlength: "密码长度须在6个至50个字符之间"},
 					email: {
 						required: "请输入邮箱", 
 						maxlength: "邮箱不能超过50个字符", 
 						remote: "邮箱已存在"},
 					confirmNewPassword: {
 						required: "请再次输入密码", 
-						maxlength: "密码不能超过50个字符",
+						maxlength: "密码须在6个至50个字符之间",
 						equalTo: "输入与上面相同的密码"},
 					tenantId: {required: "请选择所属平台"},
 					roleIdList: {required: "请选择账号角色"}
@@ -118,7 +118,7 @@
 		<div class="control-group">
 			<label class="control-label">密码:</label>
 			<div class="controls">
-				<input id="newPassword" name="newPassword" type="password" onpaste="return false"  onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" value="" maxlength="51" minlength="3" class="${empty user.id?'required':''} "/>
+				<input id="newPassword" name="newPassword" type="password" onpaste="return false"  onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" value="" maxlength="51" minlength="6" class="${empty user.id?'required':''} "/>
 				<c:if test="${empty user.id}"><span class="help-inline"><font color="red">*</font> </span></c:if>
 				<c:if test="${not empty user.id}"><span class="help-inline">若不修改密码，请留空。</span></c:if>
 			</div>
@@ -126,7 +126,7 @@
 		<div class="control-group">
 			<label class="control-label">确认密码:</label>
 			<div class="controls">
-				<input id="confirmNewPassword" name="confirmNewPassword" onpaste="return false" onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" type="password" class="${empty user.id?'required':''}  value="" maxlength="51" minlength="3" equalTo="#newPassword" />
+				<input id="confirmNewPassword" name="confirmNewPassword" onpaste="return false" onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" type="password" class="${empty user.id?'required':''}  value="" maxlength="51" minlength="6" equalTo="#newPassword" />
 				<c:if test="${empty user.id}"><span class="help-inline"><font color="red">*</font> </span></c:if>
 			</div>
 		</div>

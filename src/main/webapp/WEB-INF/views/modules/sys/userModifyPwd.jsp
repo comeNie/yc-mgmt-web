@@ -9,9 +9,16 @@
 			$("#oldPassword").focus();
 			$("#inputForm").validate({
 				rules: {
+					newPassword: {minlength:6,maxlength: 50},
+					confirmNewPassword: {minlength:6,maxlength: 50}
 				},
 				messages: {
-					confirmNewPassword: {equalTo: "输入与上面相同的密码"}
+					newPassword: {
+						required: "请输入密码", 
+						minlength: "密码长度须在6个至50个字符之间"},
+						maxlength: "密码长度须在6个至50个字符之间"},
+					confirmNewPassword: {required: "请再次输入密码", minlength: "密码长度须在6个至50个字符之间"},
+						maxlength: "密码须在6个至50个字符之间",equalTo: "输入与上面相同的密码"}
 				},
 				submitHandler: function(form){
 					loading('正在提交，请稍等...');
@@ -28,6 +35,7 @@
 				}
 			});
 		});
+	
 	</script>
 </head>
 <body>
@@ -41,14 +49,14 @@
 		<div class="control-group">
 			<label class="control-label">旧密码:</label>
 			<div class="controls">
-				<input id="oldPassword" name="oldPassword" type="password" onpaste="return false"  onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;"  value="" maxlength="50" minlength="3" class="required"/>
+				<input id="oldPassword" name="oldPassword" type="password" onpaste="return false"  onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;"  value="" maxlength="50" minlength="6" class="required"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
 		</div>
 		<div class="control-group">
 			<label class="control-label">新密码:</label>
 			<div class="controls">
-				<input id="newPassword" name="newPassword" type="password" onpaste="return false"  onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" value="" maxlength="50" minlength="3"  class="required"/>
+				<input id="newPassword" name="newPassword" type="password" onpaste="return false"  onKeypress="javascript:if(event.keyCode == 32)event.returnValue = false;" value="" maxlength="50" minlength="6"  class="required"/>
 				
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
