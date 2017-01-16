@@ -92,7 +92,7 @@
 		
 		<sys:message content="${message}"/>
 		<div class="control-group">
-			<label class="control-label">选择员工1:</label>
+			<label class="control-label">选择员工:</label>
 			<div class="controls">
 				<form:select path="id" class="required input-xlarge">
 					<form:option value="" label="${productName}"/>
