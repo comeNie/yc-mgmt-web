@@ -144,7 +144,7 @@ public class UserController extends BaseController {
 			List<User> list = new ArrayList<User>();
 			User childUser = new User();
 			childUser.setId(user.getId());
-			childUser.setNo(user.getNo());
+			childUser.setName("编号："+user.getNo()+"   姓名："+user.getName());
 			list.add(childUser);
 			model.addAttribute("userList", list);
 		} else {

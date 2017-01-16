@@ -235,7 +235,7 @@
 
 	<select id="findAllNoAccountUser" resultType="User" useCache="true">
 		SELECT
-		a.id,a.no
+		a.id,concat('编号：',no,'    姓名：',name) as name
 		FROM sys_user a
 		WHERE a.del_flag = 0
 		AND a.login_name is null
