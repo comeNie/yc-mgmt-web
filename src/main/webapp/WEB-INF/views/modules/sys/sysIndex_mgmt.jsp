@@ -137,7 +137,7 @@ if(iframe1!=null){
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 
                 <img src="${fns:getUser().photo}" alt=""/>
-                <span class="hidden-xs">您好, ${fns:getUser().name}</span> <b class="caret"></b>
+                <span class="hidden-xs">您好, ${fns:getUser().loginName}</span> <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="${ctx}/sys/user/info" target="mainFrame"><i class="fa fa-user"></i>个人中心</a></li>
