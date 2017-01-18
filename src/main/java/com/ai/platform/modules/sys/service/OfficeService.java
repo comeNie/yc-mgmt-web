@@ -6,9 +6,11 @@ package com.ai.platform.modules.sys.service;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ai.platform.common.persistence.Page;
 import com.ai.platform.common.service.TreeService;
 import com.ai.platform.modules.sys.dao.OfficeDao;
 import com.ai.platform.modules.sys.entity.Office;
@@ -48,6 +50,14 @@ public class OfficeService extends TreeService<OfficeDao, Office> {
 			return dao.findByParentIdsLike(office);
 		}
 		return  new ArrayList<Office>();
+	}
+	
+	@Transactional(readOnly = false)
+	public Page<Office> findPage(Page<Office> page, Office entity) {
+		entity.setPage(page);
+		
+		page.setList(OfficeUtils.getOfficeList());
+		return page;
 	}
 	
 	@Transactional(readOnly = false)
