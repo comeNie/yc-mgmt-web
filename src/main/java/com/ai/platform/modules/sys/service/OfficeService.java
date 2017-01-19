@@ -51,14 +51,7 @@ public class OfficeService extends TreeService<OfficeDao, Office> {
 		}
 		return  new ArrayList<Office>();
 	}
-	
-	@Transactional(readOnly = false)
-	public Page<Office> findPage(Page<Office> page, Office entity) {
-		entity.setPage(page);
-		
-		page.setList(OfficeUtils.getOfficeList());
-		return page;
-	}
+
 	
 	@Transactional(readOnly = false)
 	public void save(Office office) {
