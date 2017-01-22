@@ -34,11 +34,8 @@ public class UserCasRealm  extends CasRealm{
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) { 
     	User user=null;
     	try{
-    		logger.info("1---------------"+principals.asList().get(1).toString());
     		Map map =(Map)principals.asList().get(1);
-    		logger.info("2---------------"+map.get("userId").toString());
     		user =systemService.getUser(map.get("userId").toString());
-    		logger.info("3---------------"+user.getId());
     		user.setRoleList(roleDao.findList(new Role(user)));
 		}catch (Exception e){
 			String name = (String)getAvailablePrincipal(principals);
