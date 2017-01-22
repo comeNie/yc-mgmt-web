@@ -15,19 +15,20 @@ public class WebContextListener extends org.springframework.web.context.ContextL
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	@Override
 	public WebApplicationContext initWebApplicationContext(ServletContext servletContext) {
+		logger.info("启动加载开始");
 		try{
 			 ICacheClient _jedisGnarea = MCSClientFactory.getCacheClient("com.ai.platform.common.cache.gnarea");
 			_jedisGnarea.del("areaTreeALL","OfficeAllList","findTreeInit");
 		}catch(Exception ex){
 			logger.error("缓存===com.ai.platform.common.cache.gnarea===连接失败");
-			return super.initWebApplicationContext(servletContext);
+			
 		}
-		
+
 		if (!SystemService.printKeyLoadMessage()){
 			return null;
 		}
 		
-		
+		logger.info("启动加载完毕");
 		
 		return super.initWebApplicationContext(servletContext);
 	}
