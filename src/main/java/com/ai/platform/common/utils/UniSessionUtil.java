@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class UniSessionUtil {
+public class UniSessionUtil{
 	private static final Log LOG = LogFactory.getLog(UniSessionUtil.class);
 	private static String SESSION_PAAS_NAMESPACE  ;
     private static final String PROPERTIES_FILE_NAME = "unisession";

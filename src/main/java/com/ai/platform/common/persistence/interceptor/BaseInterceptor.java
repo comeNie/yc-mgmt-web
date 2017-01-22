@@ -15,7 +15,7 @@ import com.ai.platform.common.persistence.dialect.db.DerbyDialect;
 import com.ai.platform.common.persistence.dialect.db.H2Dialect;
 import com.ai.platform.common.persistence.dialect.db.HSQLDialect;
 import com.ai.platform.common.persistence.dialect.db.MySQLDialect;
-import com.ai.platform.common.persistence.dialect.db.OracleDialect;
+
 import com.ai.platform.common.persistence.dialect.db.PostgreSQLDialect;
 import com.ai.platform.common.persistence.dialect.db.SQLServer2005Dialect;
 import com.ai.platform.common.persistence.dialect.db.SybaseDialect;
@@ -88,8 +88,6 @@ public abstract class BaseInterceptor implements Interceptor, Serializable {
         	dialect = new HSQLDialect();
         }else if("mysql".equals(dbType)){
         	dialect = new MySQLDialect();
-        }else if("oracle".equals(dbType)){
-        	dialect = new OracleDialect();
         }else if("postgre".equals(dbType)){
         	dialect = new PostgreSQLDialect();
         }else if("mssql".equals(dbType) || "sqlserver".equals(dbType)){
